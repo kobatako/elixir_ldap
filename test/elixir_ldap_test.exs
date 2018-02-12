@@ -14,7 +14,7 @@ defmodule ElixirLdapTest do
 
   test "open ldap and simple bind", _ do
     {_, handle} = ElixirLdapClient.open()
-    {result, _} = ElixirLdap.simple_bind(, "cn=Manager,dc=home,dc=local", "secret")
+    {result, _} = ElixirLdap.simple_bind(handle, "cn=Manager,dc=home,dc=local", "secret")
     ElixirLdap.close(handle)
     assert result == :ok
   end

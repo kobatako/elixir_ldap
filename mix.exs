@@ -7,6 +7,11 @@ defmodule ElixirLdap.Mixfile do
       version: "0.1.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
+      description: "elixir LDAP Client",
+      package: [
+        maintainers: ["kobatako"],
+        license: ["MIT"]
+      ]
       deps: deps()
     ]
   end
