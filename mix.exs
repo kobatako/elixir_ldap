@@ -10,7 +10,8 @@ defmodule ElixirLdap.Mixfile do
       description: "elixir LDAP Client",
       package: [
         maintainers: ["kobatako"],
-        license: ["MIT"]
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/kobatako/elixir_ldap"}
       ],
       deps: deps()
     ]
