@@ -11,7 +11,7 @@ defmodule ElixirLdap.Mixfile do
       package: [
         maintainers: ["kobatako"],
         license: ["MIT"]
-      ]
+      ],
       deps: deps()
     ]
   end
