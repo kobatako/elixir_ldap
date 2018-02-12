@@ -1,6 +1,6 @@
 # ElixirLdap
 
-**TODO: Add description**
+This module LDAP Client for Elixir.
 
 ## Installation
 
@@ -15,7 +15,26 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/elixir_ldap](https://hexdocs.pm/elixir_ldap).
+## Online documentation
+
+[Hex docuemtn](https://hexdocs.pm/elixir_ldap/api-reference.html)
+
+## Usage
+
+```elixir
+handle = ElixirLdap.connect("192.168.11.101")
+#=> #PID<0.212.0>
+ElixirLdap.Search.search_single_level_all(handle)
+#=> {:ok,
+#=>  [%ElixirLdap.Entry{attributes: [{'objectClass', ['dcObject', 'organization']},
+#=>     {'dc', ['corporation']}, {'o', ['Corporation Inc']}],
+#=>    object_name: 'dc=corporation,dc=home,dc=local'}]}
+
+ElixirLdap.Search.search_subtree(handle, [filter: :equal, field: "cn", name: "user01"])
+#=> {:ok,
+#=>  [%ElixirLdap.Entry{attributes: [{'objectClass', ['person']},
+#=>     {'sn', ['Valentine']}, {'telephoneNumber', ['041 000 000']},
+#=>     {'cn', ['user01']}],
+#=>    object_name: 'cn=user01,ou=People,dc=corporation,dc=home,dc=local'}]}
+```
 

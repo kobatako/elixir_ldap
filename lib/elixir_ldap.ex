@@ -1,19 +1,57 @@
 defmodule ElixirLdap do
-
   @moduledoc """
-  Documentation for ElixirLdap.
+  This module LDAP Client for Elixir.
+
+  ## Using ElixirLdap Example
+
+    iex> handle = ElixirLdap.connect("192.168.11.101")
+    #=> #PID<0.212.0>
+    iex> ElixirLdap.Search.search_single_level_all(handle)
+    #=> {:ok,
+    #=> [%ElixirLdap.Entry{attributes: [{'objectClass', ['dcObject', 'organization']},
+    #=>     {'dc', ['corporation']}, {'o', ['Corporation Inc']}],
+    #=>   object_name: 'dc=corporation,dc=home,dc=local'}]}
+    iex> ElixirLdap.Search.search_subtree(handle, [filter: :equal, field: "cn", name: "user01"])
+    #=> {:ok,
+    #=> [%ElixirLdap.Entry{attributes: [{'objectClass', ['person']},
+    #=>     {'sn', ['Valentine']}, {'telephoneNumber', ['041 000 000']},
+    #=>     {'cn', ['user01']}],
+    #=>   object_name: 'cn=user01,ou=People,dc=corporation,dc=home,dc=local'}]}
+
   """
 
   @doc """ 
   open handle ldap client socket
 
   ## Example
+
     ElixirLdap.open("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
+
+  ### parameter
+  port : connect to port 
+  ssl : true or false
+  timeout : connect timeout
   """
   def open(host, options) when is_list(options) do 
     :eldap.open([to_charlist(host)], options)
   end
 
+  @doc """ 
+  open handle ldap client socket
+
+  ## Example
+
+    ElixirLdap.open("127.0.0.1")
+
+  open parameter config.exs
+
+      config :elixir_ldap, :settings,
+        host: "127.0.0.1",
+        port: 389,
+        ssl: false,
+        timeout: 5000
+
+  """
   def open(host) do 
     options = Application.get_env(:elixir_ldap, :settings)
               |> Keyword.take([:port, :ssl, :timeout])
@@ -27,6 +65,12 @@ defmodule ElixirLdap do
   end
 
   @doc """
+  ldap connect open and simple bind
+
+  ## Example
+
+    ElixirLdap.connect("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
+
   """
   def connect(host, [port: port, ssl: ssl, timeout: timeout], [user_dn: user_dn, password: password]) do
     case open([to_charlist(host)], [port: port, ssl: ssl, timeout: timeout]) do
