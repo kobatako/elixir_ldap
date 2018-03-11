@@ -23,7 +23,7 @@ defmodule ElixirLdap.Search do
 
   ## Example
 
-    ElixirLdap.Search.search_base_all(handle)
+      ElixirLdap.Search.search_base_all(handle)
 
   """
   def search_base_all(handle) do
@@ -39,7 +39,7 @@ defmodule ElixirLdap.Search do
 
   ## Example
 
-    ElixirLdap.Search.search_base_all(handle, "ou=Server,dc=corporation,dc=home,dc=local")
+      ElixirLdap.Search.search_base_all(handle, "ou=Server,dc=corporation,dc=home,dc=local")
 
   """
   def search_base_all(handle, base) when is_list(base) do
@@ -56,7 +56,7 @@ defmodule ElixirLdap.Search do
 
   ## Example
 
-    ElixirLdap.Search.search_base_all(handle, 'ou=Server,dc=corporation,dc=home,dc=local')
+      ElixirLdap.Search.search_base_all(handle, 'ou=Server,dc=corporation,dc=home,dc=local')
 
   """
   def search_base_all(handle, base) do
@@ -105,7 +105,7 @@ defmodule ElixirLdap.Search do
 
   ## Exsample
 
-    ElixirLdap.Search.search_base(handle, [filter: :equal, field: 'ou', name: 'Server'])
+      ElixirLdap.Search.search_base(handle, [filter: :equal, field: 'ou', name: 'Server'])
 
   """
   def search_base(handle, [filter: :equal, field: field, name: name]) do
@@ -121,7 +121,7 @@ defmodule ElixirLdap.Search do
 
   ## Exsample
 
-    ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :equal, field: 'ou', name: 'Server'])
+      ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :equal, field: 'ou', name: 'Server'])
 
   """
   def search_base(handle, base, [filter: :equal, field: field, name: name]) do
@@ -136,7 +136,7 @@ defmodule ElixirLdap.Search do
 
   ## Exsample
 
-    ElixirLdap.Search.search_base(handle, [filter: :present, type: 'ou'])
+      ElixirLdap.Search.search_base(handle, [filter: :present, type: 'ou'])
 
   """
   def search_base(handle, [filter: :present, type: type]) do
@@ -147,12 +147,12 @@ defmodule ElixirLdap.Search do
 
   @doc """
   search base dn entry.
-  Filter will search for present.
+  Filter will search on attribute type presence.
   Use the base DN of the argument.
 
   ## Exsample
 
-    ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :present, type: 'ou'])
+      ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :present, type: 'ou'])
 
   """
   def search_base(handle, base, [filter: :present, type: type]) do
@@ -161,21 +161,62 @@ defmodule ElixirLdap.Search do
     search(handle, base, :eldap.baseObject(), present(type), :eldap.derefAlways(), false, search_timeout)
   end
 
+  @doc """
+  search base dn entry.
+  Filter will search greater number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_base(handle, [filter: :greater, type: 'age', value: "22")
+
+  """
   def search_base(handle, [filter: :greater, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_base(handle, base, [filter: :greater, type: type, value: value])
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search greater number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :greater, type: 'age', value: "22")
+
+  """
   def search_base(handle, base, [filter: :greater, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.baseObject(), greater_or_equal(type, value), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search less number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_base(handle, [filter: :less, type: 'age', value: "22")
+
+  """
   def search_base(handle, [filter: :less, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_base(handle, base, [filter: :less, type: type, value: value])
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search less number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :less, type: 'age', value: "22")
+
+  """
   def search_base(handle, base, [filter: :less, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
@@ -219,48 +260,132 @@ defmodule ElixirLdap.Search do
     raise "search base could not be matched. Please check the argument"
   end
 
+
   @doc """
+  search single level entry.
+  Filter will search for equal.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, [filter: :equal, field: 'ou', name: 'Server'])
+
   """
   def search_single_level(handle, [filter: :equal, field: field, name: name]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_single_level(handle, base, [filter: :equal, field: field, name: name])
   end
+
+  @doc """
+  search single level entry.
+  Filter will search for equal.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :equal, field: 'ou', name: 'Server'])
+
+  """
   def search_single_level(handle, base, [filter: :equal, field: field, name: name]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.singleLevel(), equality_match(field, name), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search single level entry.
+  Filter will search on attribute type presence.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, [filter: :present, type: 'ou'])
+
+  """
   def search_single_level(handle, [filter: :present, type: type]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_single_level(handle, base, [filter: :present, type: type])
   end
+
+  @doc """
+  search single level entry.
+  Filter will search on attribute type presence.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :present, type: 'ou'])
+
+  """
   def search_single_level(handle, base, [filter: :present, type: type]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.singleLevel(), present(type), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search single level entry.
+  Filter will search greater number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, [filter: :greater, type: 'age', value: "22")
+
+  """
   def search_single_level(handle, [filter: :greater, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_single_level(handle, base, [filter: :greater, type: type, value: value])
   end
+
+  @doc """
+  search single level entry.
+  Filter will search greater number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :greater, type: 'age', value: "22"])
+
+  """
   def search_single_level(handle, base, [filter: :greater, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.singleLevel(), greater_or_equal(type, value), :eldap.derefAlways(), false, search_timeout)
   end
+
+
+  @doc """
+  search single level entry.
+  Filter will search less number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, [filter: :less, type: 'age', value: "22")
+
+  """
   def search_single_level(handle, [filter: :less, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_single_level(handle, base, [filter: :less, type: type, value: value])
   end
+
+  @doc """
+  search single level entry.
+  Filter will search less number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_single_level(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :less, type: 'age', value: "22"])
+
+  """
   def search_single_level(handle, base, [filter: :less, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.singleLevel(), less_or_equal(type, value), :eldap.derefAlways(), false, search_timeout)
   end
+
   def search_single_level(handle, [filter: :approx, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
@@ -293,42 +418,123 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  search sub tree entry.
+  Filter will search for equal.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, [filter: :equal, field: 'ou', name: 'Server'])
+
   """
   def search_subtree(handle, [filter: :equal, field: field, name: name]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_subtree(handle, base, [filter: :equal, field: field, name: name])
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search for equal.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :equal, field: 'ou', name: 'Server'])
+
+  """
   def search_subtree(handle, base, [filter: :equal, field: field, name: name]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.wholeSubtree(), equality_match(field, name), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search on attribute type presence.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, [filter: :present, type: 'ou'])
+
+  """
   def search_subtree(handle, [filter: :present, type: type]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_subtree(handle, base, [filter: :present, type: type])
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search on attribute type presence.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :present, type: 'ou'])
+
+  """
   def search_subtree(handle, base, [filter: :present, type: type]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.wholeSubtree(), present(type), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search greater number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, [filter: :greater, type: 'age', value: "22"])
+
+  """
   def search_subtree(handle, [filter: :greater, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_subtree(handle, base, [filter: :greater, type: type, value: value])
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search greater number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :greater, type: 'age', value: "22"])
+
+  """
   def search_subtree(handle, base, [filter: :greater, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.wholeSubtree(), greater_or_equal(type, value), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search less number.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, [filter: :greater, type: 'age', value: "22"])
+
+  """
   def search_subtree(handle, [filter: :less, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_subtree(handle, base, [filter: :less, type: type, value: value])
   end
+
+  @doc """
+  search sub tree entry.
+  Filter will search less number.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+      ElixirLdap.Search.search_subtree(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :greater, type: 'age', value: "22"])
+
+  """
   def search_subtree(handle, base, [filter: :less, type: type, value: value]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
@@ -366,24 +572,48 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  search filter equality match
+
+  ## Exsample
+
+      ElixirLdap.Serach.equality_match("cn", "User01")
+
   """
   def equality_match(field, name) do
     :eldap.equalityMatch(to_charlist(field), to_charlist(name))
   end
 
   @doc """
+  search filter attribute
+
+  ## Exsample
+
+      ElixirLdap.Serach.present("telephoneNumber")
+
   """
   def present(type) do
     :eldap.present(to_charlist(type))
   end
 
   @doc """
+  search filter greater number
+
+  ## Exsample
+
+      ElixirLdap.Serach.greater_or_equal("age", "22")
+
   """
   def greater_or_equal(type, value) do
     :eldap.greaterOrEqual(to_charlist(type), to_charlist(value))
   end
 
   @doc """
+  search filter less number
+
+  ## Exsample
+
+      ElixirLdap.Serach.less_or_equal("age", "22")
+
   """
   def less_or_equal(type, value) do
     :eldap.lessOrEqual(to_charlist(type), to_charlist(value))
@@ -418,18 +648,21 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  and search filter
   """
   def with_and(filters) do
     :eldap.and(filters)
   end
 
   @doc """
+  or search filter
   """
   def with_or(filters) do
     :eldap.or(filters)
   end
 
   @doc """
+  not search filter
   """
   def with_not(filters) do
     :eldap.not(filters)

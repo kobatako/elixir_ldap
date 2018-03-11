@@ -47,8 +47,9 @@ defmodule ElixirLdap do
 
   ## Example
 
-    ElixirLdap.open("127.0.0.1")
+      ElixirLdap.open("127.0.0.1")
 
+  ### parameter
   open parameter config.exs
 
       config :elixir_ldap, :settings,
@@ -75,7 +76,7 @@ defmodule ElixirLdap do
 
   ## Example
 
-    ElixirLdap.connect("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
+      ElixirLdap.connect("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
 
   """
   def connect(host, [port: port, ssl: ssl, timeout: timeout], [user_dn: user_dn, password: password]) do
@@ -121,9 +122,15 @@ defmodule ElixirLdap do
   end
 
   @doc """
+  close handle
+
+  ## Exsample
+
+      ElixirLdap.close(handle)
+
   """
-  def close(connect) do
-    :eldap.close(connect)
+  def close(handle) do
+    :eldap.close(handle)
   end
 
   @doc """
@@ -141,7 +148,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.add(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
+      ElixirLdap.add(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
 
   """
   def add(handle, dn, attribute) when is_list(dn) and is_list(attribute) do
@@ -153,7 +160,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.add(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
+      ElixirLdap.add(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
 
   """
   def add(handle, dn, attribute) when is_list(attribute) do
@@ -165,7 +172,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.delete(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"])
+      ElixirLdap.delete(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"])
 
   """
   def delete(handle, dn) when is_list(dn) do
@@ -177,7 +184,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.delete(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local")
+      ElixirLdap.delete(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local")
 
   """
   def delete(handle, dn) do
@@ -204,7 +211,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-     ElixirLdap.modify(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 333"]])
+      ElixirLdap.modify(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 333"]])
 
   """
   def modify(handle, dn, attribute) when is_list(dn) and is_list(attribute) do
@@ -216,7 +223,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.modify(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 333"]])
+      ElixirLdap.modify(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 333"]])
 
   """
   def modify(handle, dn, attribute) when is_list(attribute) do
@@ -243,7 +250,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.modify_dn(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], "cn=user101", true, "")
+      ElixirLdap.modify_dn(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], "cn=user101", true, "")
 
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) when is_list(dn) do
@@ -255,7 +262,7 @@ defmodule ElixirLdap do
 
   ## Exsample
 
-    ElixirLdap.modify_dn(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", "cn=user101", true, "")
+      ElixirLdap.modify_dn(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", "cn=user101", true, "")
 
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) do
