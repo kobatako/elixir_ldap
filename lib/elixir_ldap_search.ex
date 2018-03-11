@@ -18,12 +18,30 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  Search base dn all entry.
+  Search by base dn set in config file.
+
+  ## Example
+
+    ElixirLdap.Search.search_base_all(handle)
+
   """
   def search_base_all(handle) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_base_all(handle, base)
   end
+
+  @doc """
+  Search base dn all entry.  
+  Use the base DN of the argument.
+  Argument base dn is list.
+
+  ## Example
+
+    ElixirLdap.Search.search_base_all(handle, "ou=Server,dc=corporation,dc=home,dc=local")
+
+  """
   def search_base_all(handle, base) when is_list(base) do
     if is_tuple(List.first(base)) do
       search_base_all(handle, to_listchar_atom_key(base))
@@ -31,6 +49,16 @@ defmodule ElixirLdap.Search do
       search_base(handle, base, [filter: :present, type: "objectClass"])
     end
   end
+
+  @doc """
+  Search base dn all entry.
+  Use the base DN of the argument.
+
+  ## Example
+
+    ElixirLdap.Search.search_base_all(handle, 'ou=Server,dc=corporation,dc=home,dc=local')
+
+  """
   def search_base_all(handle, base) do
     search_base(handle, base, [filter: :present, type: "objectClass"])
   end
@@ -72,27 +100,67 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  search base dn entry.
+  Filter will search for equal.
+
+  ## Exsample
+
+    ElixirLdap.Search.search_base(handle, [filter: :equal, field: 'ou', name: 'Server'])
+
   """
   def search_base(handle, [filter: :equal, field: field, name: name]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_base(handle, base, [filter: :equal, field: field, name: name])
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search for equal.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+    ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :equal, field: 'ou', name: 'Server'])
+
+  """
   def search_base(handle, base, [filter: :equal, field: field, name: name]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.baseObject(), equality_match(field, name), :eldap.derefAlways(), false, search_timeout)
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search on attribute type presence.
+
+  ## Exsample
+
+    ElixirLdap.Search.search_base(handle, [filter: :present, type: 'ou'])
+
+  """
   def search_base(handle, [filter: :present, type: type]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
     search_base(handle, base, [filter: :present, type: type])
   end
+
+  @doc """
+  search base dn entry.
+  Filter will search for present.
+  Use the base DN of the argument.
+
+  ## Exsample
+
+    ElixirLdap.Search.search_base(handle, 'ou=People,dc=corporation,dc=home,dc=local', [filter: :present, type: 'ou'])
+
+  """
   def search_base(handle, base, [filter: :present, type: type]) do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.baseObject(), present(type), :eldap.derefAlways(), false, search_timeout)
   end
+
   def search_base(handle, [filter: :greater, type: type, value: value]) do
     base = Application.get_env(:elixir_ldap, :settings)
           |> Keyword.get(:base)
@@ -142,6 +210,13 @@ defmodule ElixirLdap.Search do
     search_timeout = Application.get_env(:elixir_ldap, :settings)
                     |> Keyword.get(:search_time) || 0
     search(handle, base, :eldap.baseObject(), substrings(type, value), :eldap.derefAlways(), false, search_timeout)
+  end
+
+  def search_base(_, argument) when is_list(argument) do
+    raise "search base could not be matched. Please check the argument"
+  end
+  def search_base(_, _, argument) when is_list(argument) do
+    raise "search base could not be matched. Please check the argument"
   end
 
   @doc """

@@ -4,19 +4,25 @@ defmodule ElixirLdap do
 
   ## Using ElixirLdap Example
 
-    iex> handle = ElixirLdap.connect("192.168.11.101")
-    #=> #PID<0.212.0>
-    iex> ElixirLdap.Search.search_single_level_all(handle)
-    #=> {:ok,
-    #=> [%ElixirLdap.Entry{attributes: [{'objectClass', ['dcObject', 'organization']},
-    #=>     {'dc', ['corporation']}, {'o', ['Corporation Inc']}],
-    #=>   object_name: 'dc=corporation,dc=home,dc=local'}]}
-    iex> ElixirLdap.Search.search_subtree(handle, [filter: :equal, field: "cn", name: "user01"])
-    #=> {:ok,
-    #=> [%ElixirLdap.Entry{attributes: [{'objectClass', ['person']},
-    #=>     {'sn', ['Valentine']}, {'telephoneNumber', ['041 000 000']},
-    #=>     {'cn', ['user01']}],
-    #=>   object_name: 'cn=user01,ou=People,dc=corporation,dc=home,dc=local'}]}
+  ElixirLdap example 
+
+      iex> handle = ElixirLdap.connect("192.168.11.101")
+      #PID<0.212.0>
+
+      iex> ElixirLdap.Search.search_single_level_all(handle)
+      {:ok,
+      [%ElixirLdap.Entry{attributes: [{'objectClass', ['dcObject', 'organization']},
+          {'dc', ['corporation']}, {'o', ['Corporation Inc']}],
+        object_name: 'dc=corporation,dc=home,dc=local'}]}
+
+      iex> ElixirLdap.Search.search_subtree(handle, [filter: :equal, field: "cn", name: "user01"])
+      {:ok,
+      [%ElixirLdap.Entry{attributes: [{'objectClass', ['person']},
+          {'sn', ['Valentine']}, {'telephoneNumber', ['041 000 000']},
+          {'cn', ['user01']}],
+        object_name: 'cn=user01,ou=People,dc=corporation,dc=home,dc=local'}]}
+
+  connect LDAP server and search signle level and search subtree equal cn
 
   """
 
@@ -25,7 +31,7 @@ defmodule ElixirLdap do
 
   ## Example
 
-    ElixirLdap.open("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
+      ElixirLdap.open("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
 
   ### parameter
   port : connect to port 
@@ -131,22 +137,49 @@ defmodule ElixirLdap do
   end
 
   @doc """
+  add entry
+
+  ## Exsample
+
+    ElixirLdap.add(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
+
   """
-  def add(handle, dn, attribute) when is_tuple(attribute) do
-    add(handle, dn, [attribute])
-  end
   def add(handle, dn, attribute) when is_list(dn) and is_list(attribute) do
     add(handle, to_listchar_atom_key(dn), Enum.map(attribute, &to_char_tuple_key(&1)))
   end
+
+  @doc """
+  add entry
+
+  ## Exsample
+
+    ElixirLdap.add(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 0001"], objectClass: ["person"], sn: ["user"]])
+
+  """
   def add(handle, dn, attribute) when is_list(attribute) do
     :eldap.add(handle, to_charlist(dn), Enum.map(attribute, &to_char_tuple_key(&1)))
   end
 
   @doc """
+  delete entry
+
+  ## Exsample
+
+    ElixirLdap.delete(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"])
+
   """
   def delete(handle, dn) when is_list(dn) do
     delete(handle, to_listchar_atom_key(dn))
   end
+
+  @doc """
+  delete entry
+
+  ## Exsample
+
+    ElixirLdap.delete(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local")
+
+  """
   def delete(handle, dn) do
     :eldap.delete(handle, to_charlist(dn))
   end
@@ -167,13 +200,25 @@ defmodule ElixirLdap do
   end
 
   @doc """
+  modify entry
+
+  ## Exsample
+
+     ElixirLdap.modify(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", [telephoneNumber: ["545 555 333"]])
+
   """
-  def modify(handle, dn, attribute) when is_tuple(attribute) do
-    modify(handle, dn, [attribute])
-  end
   def modify(handle, dn, attribute) when is_list(dn) and is_list(attribute) do
     modify(handle, to_listchar_atom_key(dn), Enum.map(attribute, &mod_options_params(&1)))
   end
+
+  @doc """
+  modify entry
+
+  ## Exsample
+
+    ElixirLdap.modify(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], [telephoneNumber: ["545 555 333"]])
+
+  """
   def modify(handle, dn, attribute) when is_list(attribute) do
     :eldap.modify(handle, to_charlist(dn), Enum.map(attribute, &mod_options_params(&1)))
   end
@@ -194,10 +239,25 @@ defmodule ElixirLdap do
   end
 
   @doc """
+  modify dn entry
+
+  ## Exsample
+
+    ElixirLdap.modify_dn(handle, [cn: "user01", ou: "People", dc: "corporation", dc: "home", dc: "local"], "cn=user101", true, "")
+
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) when is_list(dn) do
     modify_dn(handle, to_listchar_atom_key(dn), to_charlist(new_rdn), delete_old_rdn, to_charlist(new_sup_dn))
   end
+
+  @doc """
+  modify dn entry
+
+  ## Exsample
+
+    ElixirLdap.modify_dn(handle, "cn=user01,ou=People,dc=corporation,dc=home,dc=local", "cn=user101", true, "")
+
+  """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) do
     :eldap.modify_dn(handle, to_charlist(dn), to_charlist(new_rdn), delete_old_rdn, to_charlist(new_sup_dn))
   end
