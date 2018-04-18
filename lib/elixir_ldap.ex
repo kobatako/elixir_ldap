@@ -4,7 +4,7 @@ defmodule ElixirLdap do
 
   ## Using ElixirLdap Example
 
-  ElixirLdap example 
+  ElixirLdap example
 
       iex> handle = ElixirLdap.connect("192.168.11.101")
       #PID<0.212.0>
@@ -26,7 +26,7 @@ defmodule ElixirLdap do
 
   """
 
-  @doc """ 
+  @doc """
   open handle ldap client socket
 
   ## Example
@@ -34,15 +34,15 @@ defmodule ElixirLdap do
       ElixirLdap.open("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
 
   ### parameter
-  port : connect to port 
+  port : connect to port
   ssl : true or false
   timeout : connect timeout
   """
-  def open(host, options) when is_list(options) do 
+  def open(host, options) when is_list(options) do
     :eldap.open([to_charlist(host)], options)
   end
 
-  @doc """ 
+  @doc """
   open handle ldap client socket
 
   ## Example
@@ -56,10 +56,12 @@ defmodule ElixirLdap do
         host: "127.0.0.1",
         port: 389,
         ssl: false,
-        timeout: 5000
-
+        timeout: 5000,
+        user_dn: "cn=Manager,dc=home,dc=local",
+        password: "secret",
+        base: "dc=home,dc=local"
   """
-  def open(host) do 
+  def open(host) do
     options = Application.get_env(:elixir_ldap, :settings)
               |> Keyword.take([:port, :ssl, :timeout])
     open(host, options)
@@ -133,8 +135,6 @@ defmodule ElixirLdap do
     :eldap.close(handle)
   end
 
-  @doc """
-  """
   defp to_char_tuple_key({key, value}) do
     {to_charlist(key), value}
   end
@@ -267,5 +267,59 @@ defmodule ElixirLdap do
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) do
     :eldap.modify_dn(handle, to_charlist(dn), to_charlist(new_rdn), delete_old_rdn, to_charlist(new_sup_dn))
+  end
+
+  @doc """
+  convert object name add map entity list
+
+  ## Example
+
+      ElixirLdap.Search.search_subtree_all(handle) |> ElixirLdap.convert_objects_name
+
+  """
+  def convert_objects_name({:ok, objects}) do
+    convert_objects_name(objects)
+  end
+
+  def convert_objects_name([object| []]) do
+    [convert_object_name(object)]
+  end
+
+  def convert_objects_name([object| tail]) do
+    [convert_object_name(object)] ++ convert_objects_name(tail)
+  end
+
+  @doc """
+  convert objerct name add map entity
+
+  ## Example
+
+      ElixirLdap.convert_object_name(entity)
+
+      >%{
+      >  __struct__: ElixirLdap.Entry,
+      >  attributes: [
+      >    {'objectClass', ['dcObject', 'organization']},
+      >    {'dc', ['corporation']},
+      >    {'o', ['Corporation Inc']},
+      >    {'telephoneNumber', ['999 0000 0000']},
+      >    {'postalCode', ['820-0000']}
+      >  ],
+      >  object_name: 'dc=corporation,dc=home,dc=local',
+      >  object_names: [
+      >    %{"name" => "dc", "value" => "corporation"},
+      >    %{"name" => "dc", "value" => "home"},
+      >    %{"name" => "dc", "value" => "local"}
+      >  ]
+      >}
+
+  """
+  def convert_object_name(object) do
+    Map.merge(object,
+      %{
+        object_names: Regex.split(~r/,/, to_string(object.object_name))
+        |> Enum.map(&Regex.named_captures(~r/(?<name>.*)=(?<value>.*)/, &1))
+      }
+    )
   end
 end
