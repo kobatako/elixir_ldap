@@ -10,7 +10,7 @@ by adding `elixir_ldap` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:elixir_ldap, "~> 0.1.0"}
+    {:elixir_ldap, "~> 0.2.0"}
   ]
 end
 ```
