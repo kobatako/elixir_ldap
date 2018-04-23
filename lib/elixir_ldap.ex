@@ -277,6 +277,10 @@ defmodule ElixirLdap do
       ElixirLdap.Search.search_subtree_all(handle) |> ElixirLdap.convert_objects_name
 
   """
+  def convert_objects_name([]) do
+    nil
+  end
+
   def convert_objects_name({:ok, objects}) do
     convert_objects_name(objects)
   end
