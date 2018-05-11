@@ -4,7 +4,7 @@ defmodule ElixirLdap.Mixfile do
   def project do
     [
       app: :elixir_ldap,
-      version: "0.2.1",
+      version: "0.3.0",
       elixir: "~> 1.5",
       start_permanent: Mix.env == :prod,
       description: "elixir LDAP Client",
