@@ -29,11 +29,12 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
-  config :elixir_ldap, :settings,
-    host: "192.168.11.101",
-    base: "dc=home,dc=local",
-    port: 389,
-    ssl: false,
-    user_dn: "cn=Manager,dc=home,dc=local",
-    password: "secret",
-    timeout: 5000
+config :elixir_ldap, :settings,
+  # host: "192.168.11.101",
+  host: "172.22.0.2",
+  base: "dc=home,dc=local",
+  port: 389,
+  ssl: false,
+  user_dn: "cn=Manager,dc=home,dc=local",
+  password: "secret",
+  timeout: 5000

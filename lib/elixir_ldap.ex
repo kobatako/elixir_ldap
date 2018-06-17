@@ -62,14 +62,18 @@ defmodule ElixirLdap do
         base: "dc=home,dc=local"
   """
   def open(host) do
-    options = Application.get_env(:elixir_ldap, :settings)
-              |> Keyword.take([:port, :ssl, :timeout])
+    options =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.take([:port, :ssl, :timeout])
+
     open(host, options)
   end
 
   def open() do
-    {:ok, host} = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.fetch(:host)
+    {:ok, host} =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.fetch(:host)
+
     open(host)
   end
 
@@ -81,33 +85,48 @@ defmodule ElixirLdap do
       ElixirLdap.connect("127.0.0.1", [port: port, ssl: ssl, timeout: timeout])
 
   """
-  def connect(host, [port: port, ssl: ssl, timeout: timeout], [user_dn: user_dn, password: password]) do
-    case open([to_charlist(host)], [port: port, ssl: ssl, timeout: timeout]) do
+  def connect(
+        host,
+        [port: port, ssl: ssl, timeout: timeout],
+        user_dn: user_dn,
+        password: password
+      ) do
+    case open([to_charlist(host)], port: port, ssl: ssl, timeout: timeout) do
       {:ok, handle} -> simple_bind(handle, user_dn, password)
       error -> error
     end
   end
-  def connect(host, [user_dn: user_dn, password: password]) do
-    options = Application.get_env(:elixir_ldap, :settings)
-              |> Keyword.take([:port, :ssl, :timeout])
+
+  def connect(host, user_dn: user_dn, password: password) do
+    options =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.take([:port, :ssl, :timeout])
+
     case open(host, options) do
       {:ok, handle} -> simple_bind(handle, user_dn, password)
       error -> error
     end
   end
-  def connect(host, [port: port, ssl: ssl, timeout: timeout]) do
-    [user_dn: user_dn, password: password] = Application.get_env(:elixir_ldap, :settings)
-              |> Keyword.take([:user_dn, :password])
-    case open(host, [port: port, ssl: ssl, timeout: timeout]) do
+
+  def connect(host, port: port, ssl: ssl, timeout: timeout) do
+    [user_dn: user_dn, password: password] =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.take([:user_dn, :password])
+
+    case open(host, port: port, ssl: ssl, timeout: timeout) do
       {:ok, handle} -> simple_bind(handle, user_dn, password)
       error -> error
     end
   end
+
   def connect(host) do
-    options = Application.get_env(:elixir_ldap, :settings)
-              |> Keyword.take([:port, :ssl, :timeout])
+    options =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.take([:port, :ssl, :timeout])
+
     connect(host, options)
   end
+
   def connect() do
     settings = Application.get_env(:elixir_ldap, :settings)
     {:ok, host} = Keyword.fetch(settings, :host)
@@ -140,7 +159,7 @@ defmodule ElixirLdap do
   end
 
   defp to_listchar_atom_key(dn_list) do
-    Enum.map_join(dn_list, ",", fn({key, value}) -> to_string(key) <> "=" <> value end)
+    Enum.map_join(dn_list, ",", fn {key, value} -> to_string(key) <> "=" <> value end)
   end
 
   @doc """
@@ -196,12 +215,15 @@ defmodule ElixirLdap do
   defp mod_options_params({type, value}) when is_list(value) do
     mod_options_params({:replace, type, value})
   end
+
   defp mod_options_params({:add, type, value}) when is_list(value) do
     :eldap.mod_add(to_charlist(type), value)
   end
+
   defp mod_options_params({:replace, type, value}) when is_list(value) do
     :eldap.mod_replace(to_charlist(type), value)
   end
+
   defp mod_options_params({:delete, type, value}) when is_list(value) do
     :eldap.mod_delete(to_charlist(type), value)
   end
@@ -235,14 +257,27 @@ defmodule ElixirLdap do
   def modify_password(handle, dn, password) when is_list(dn) do
     modify_password(handle, to_listchar_atom_key(dn), to_charlist(password))
   end
+
   def modify_password(handle, dn, password) do
     :eldap.modify_password(handle, to_charlist(dn), to_charlist(password))
   end
+
   def modify_password(handle, dn, new_password, old_password) when is_list(dn) do
-    modify_password(handle, to_listchar_atom_key(dn), to_charlist(new_password), to_charlist(old_password))
+    modify_password(
+      handle,
+      to_listchar_atom_key(dn),
+      to_charlist(new_password),
+      to_charlist(old_password)
+    )
   end
+
   def modify_password(handle, dn, new_password, old_password) do
-    :eldap.modify_password(handle, to_charlist(dn), to_charlist(new_password), to_charlist(old_password))
+    :eldap.modify_password(
+      handle,
+      to_charlist(dn),
+      to_charlist(new_password),
+      to_charlist(old_password)
+    )
   end
 
   @doc """
@@ -254,7 +289,13 @@ defmodule ElixirLdap do
 
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) when is_list(dn) do
-    modify_dn(handle, to_listchar_atom_key(dn), to_charlist(new_rdn), delete_old_rdn, to_charlist(new_sup_dn))
+    modify_dn(
+      handle,
+      to_listchar_atom_key(dn),
+      to_charlist(new_rdn),
+      delete_old_rdn,
+      to_charlist(new_sup_dn)
+    )
   end
 
   @doc """
@@ -266,7 +307,13 @@ defmodule ElixirLdap do
 
   """
   def modify_dn(handle, dn, new_rdn, delete_old_rdn, new_sup_dn) do
-    :eldap.modify_dn(handle, to_charlist(dn), to_charlist(new_rdn), delete_old_rdn, to_charlist(new_sup_dn))
+    :eldap.modify_dn(
+      handle,
+      to_charlist(dn),
+      to_charlist(new_rdn),
+      delete_old_rdn,
+      to_charlist(new_sup_dn)
+    )
   end
 
   @doc """
@@ -285,11 +332,11 @@ defmodule ElixirLdap do
     convert_objects_name(objects)
   end
 
-  def convert_objects_name([object| []]) do
+  def convert_objects_name([object | []]) do
     [convert_object_name(object)]
   end
 
-  def convert_objects_name([object| tail]) do
+  def convert_objects_name([object | tail]) do
     [convert_object_name(object)] ++ convert_objects_name(tail)
   end
 
@@ -319,11 +366,10 @@ defmodule ElixirLdap do
 
   """
   def convert_object_name(object) do
-    Map.merge(object,
-      %{
-        object_names: Regex.split(~r/,/, to_string(object.object_name))
+    Map.merge(object, %{
+      object_names:
+        Regex.split(~r/,/, to_string(object.object_name))
         |> Enum.map(&Regex.named_captures(~r/(?<name>.*)=(?<value>.*)/, &1))
-      }
-    )
+    })
   end
 end
