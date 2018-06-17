@@ -21,6 +21,5 @@ defmodule ElixirLdapTest do
 
   test "search base" do
     {_, handle} = ElixirLdap.connect()
-    
   end
 end

@@ -6,23 +6,25 @@ defmodule ElixirLdap.Search do
   collation_define
 
   defp is_collation_rule?(collation_rule) do
-    Enum.any?(ElixirLdap.Collation.collation_rules, fn(rule) -> rule == collation_rule end)
+    Enum.any?(ElixirLdap.Collation.collation_rules(), fn rule -> rule == collation_rule end)
   end
 
   defp to_listchar_atom_key(dn_list) do
-    Enum.map_join(dn_list, ",", fn({key, value}) -> to_string(key) <> "=" <> value end)
+    Enum.map_join(dn_list, ",", fn {key, value} -> to_string(key) <> "=" <> value end)
   end
 
   defp search_scope(scope) when is_atom(scope) do
     case scope do
       # Search baseobject only.
-      :base_object -> 
+      :base_object ->
         :eldap.baseObject()
+
       # Search the specified level only, i.e. do not recurse
-      :single_level -> 
+      :single_level ->
         :eldap.singleLevel()
+
       # Search the entire subtree.
-      :whole_subtree -> 
+      :whole_subtree ->
         :eldap.wholeSubtree()
     end
   end
@@ -36,13 +38,16 @@ defmodule ElixirLdap.Search do
       # Do not refer to alias entries
       :never_deref_aliases ->
         :eldap.neverDerefAliases()
+
       # If the base DN of the search is an alias entry, it refers to it, ignoring the alias entry under it
       :deref_in_searching ->
         :eldap.derefInSearching()
+
       # If the base DN of the search is an alias entry no search is performed.
       # If the base DN is not an alias entry, a search is performed, and furthermore, an alias entry under the base DN is referred to
       :deref_finding_baes_obj ->
         :eldap.derefFindingBaseObj()
+
       # Always refer to alias entries
       :deref_always ->
         :eldap.derefAlways()
@@ -63,8 +68,10 @@ defmodule ElixirLdap.Search do
 
   """
   def search_base_all(handle) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
     search_base_all(handle, base)
   end
 
@@ -82,8 +89,21 @@ defmodule ElixirLdap.Search do
     if is_tuple(List.first(base)) do
       search_base_all(handle, to_listchar_atom_key(base))
     else
-      search_base(handle, base, [filter: :present, type: "objectClass"])
+      search_base(handle, base, filter: :present, type: "objectClass")
     end
+  end
+
+  @doc """
+  Search base dn all entry.
+  Use the base DN of the argument.
+
+  ## Example
+
+      ElixirLdap.Search.search_base_all(handle, 'ou=Server,dc=corporation,dc=home,dc=local')
+
+  """
+  def search_base_all(handle, base) do
+    search_base(handle, base, filter: :present, type: "objectClass")
   end
 
   @doc """
@@ -102,21 +122,8 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base_all(handle, base, def) when is_atom(def) do
-    search_base(handle, base, [filter: :present, type: "objectClass"], def)
-  end
-
-  @doc """
-  Search base dn all entry.
-  Use the base DN of the argument.
-
-  ## Example
-
-      ElixirLdap.Search.search_base_all(handle, 'ou=Server,dc=corporation,dc=home,dc=local')
-
-  """
-  def search_base_all(handle, base) do
-    search_base(handle, base, [filter: :present, type: "objectClass"])
+  def search_base_all(handle, base, defer) when is_atom(defer) do
+    search_base(handle, base, [filter: :present, type: "objectClass"], defer)
   end
 
   @doc """
@@ -129,8 +136,10 @@ defmodule ElixirLdap.Search do
 
   """
   def search_single_level_all(handle) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
     search_single_level_all(handle, base)
   end
 
@@ -141,14 +150,14 @@ defmodule ElixirLdap.Search do
   ## Example
 
       ElixirLdap.Search.search_single_level_all(handle, [ou: "People", dc: "corporation", dc: "home" ,dc: "local"])
-			ElixirLdap.Search.search_single_level_all(handle, [{:ou, "People"}, {:dc, "corporation"}, {:dc, "home"}, {:dc, "local"}])
+  	ElixirLdap.Search.search_single_level_all(handle, [{:ou, "People"}, {:dc, "corporation"}, {:dc, "home"}, {:dc, "local"}])
 
   """
   def search_single_level_all(handle, base) when is_list(base) do
     if is_tuple(List.first(base)) do
       search_single_level_all(handle, to_listchar_atom_key(base))
     else
-      search_single_level(handle, base, [filter: :present, type: "objectClass"])
+      search_single_level(handle, base, filter: :present, type: "objectClass")
     end
   end
 
@@ -162,13 +171,12 @@ defmodule ElixirLdap.Search do
 
   """
   def search_single_level_all(handle, base) do
-    search_single_level(handle, base, [filter: :present, type: "objectClass"])
+    search_single_level(handle, base, filter: :present, type: "objectClass")
   end
 
   @doc """
   Search single level all entry.
-  Use the base DN of argument.
-	deref aliases is argument
+  Use the base DN of argument.deref aliases is argument
 
   ## Example
 
@@ -182,29 +190,34 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level_all(handle, base, def) when is_atom(def) do
-    search_single_level(handle, base, [filter: :present, type: "objectClass"], def)
+  def search_single_level_all(handle, base, defer) when is_atom(defer) do
+    search_single_level(handle, base, [filter: :present, type: "objectClass"], defer)
   end
 
   @doc """
   """
   def search_subtree_all(handle) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
     search_subtree_all(handle, base)
   end
+
   def search_subtree_all(handle, base) when is_list(base) do
     if is_tuple(List.first(base)) do
       search_subtree_all(handle, to_listchar_atom_key(base))
     else
-    search_subtree(handle, base, [filter: :present, type: "objectClass"])
+      search_subtree(handle, base, filter: :present, type: "objectClass")
     end
   end
+
   def search_subtree_all(handle, base) do
-    search_subtree(handle, base, [filter: :present, type: "objectClass"])
+    search_subtree(handle, base, filter: :present, type: "objectClass")
   end
-  def search_subtree_all(handle, base, def) do
-    search_subtree(handle, base, [filter: :present, type: "objectClass"], def)
+
+  def search_subtree_all(handle, base, defer) do
+    search_subtree(handle, base, [filter: :present, type: "objectClass"], defer)
   end
 
   @doc """
@@ -220,8 +233,10 @@ defmodule ElixirLdap.Search do
 
   """
   def search_base(handle, options) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
     search_base(handle, base, options)
   end
 
@@ -247,10 +262,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base(handle, base, [filter: :equal, field: field, name: name], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, equality_match(field, name), def, false, search_timeout)
+  def search_base(handle, base, [filter: :equal, field: field, name: name], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :base_object, equality_match(field, name), defer, false, search_timeout)
   end
 
   @doc """
@@ -270,10 +287,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base(handle, base, [filter: :present, type: type], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, present(type), def, false, search_timeout)
+  def search_base(handle, base, [filter: :present, type: type], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :base_object, present(type), defer, false, search_timeout)
   end
 
   @doc """
@@ -293,10 +312,20 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base(handle, base, [filter: :greater, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, greater_or_equal(type, value), def, false, search_timeout)
+  def search_base(handle, base, [filter: :greater, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :base_object,
+      greater_or_equal(type, value),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
   @doc """
@@ -316,10 +345,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base(handle, base, [filter: :less, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, less_or_equal(type, value), def, false, search_timeout)
+  def search_base(handle, base, [filter: :less, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :base_object, less_or_equal(type, value), defer, false, search_timeout)
   end
 
   @doc """
@@ -338,22 +369,41 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_base(handle, base, [filter: :approx, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, approx_match(type, value), def, false, search_timeout)
+  def search_base(handle, base, [filter: :approx, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :base_object, approx_match(type, value), defer, false, search_timeout)
   end
 
-  def search_base(handle, base, [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, extensible_match(value, type, rule, dn_attribute), def, false, search_timeout)
+  def search_base(
+        handle,
+        base,
+        [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute],
+        defer
+      ) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :base_object,
+      extensible_match(value, type, rule, dn_attribute),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
-  def search_base(handle, base, [filter: :strings, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :base_object, substrings(type, value), def, false, search_timeout)
+  def search_base(handle, base, [filter: :strings, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :base_object, substrings(type, value), defer, false, search_timeout)
   end
 
   @doc """
@@ -370,8 +420,10 @@ defmodule ElixirLdap.Search do
 
   """
   def search_single_level(handle, options) when is_list(options) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
     search_single_level(handle, base, options)
   end
 
@@ -396,10 +448,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level(handle, base, [filter: :equal, field: field, name: name], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, equality_match(field, name), def, false, search_timeout)
+  def search_single_level(handle, base, [filter: :equal, field: field, name: name], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :single_level, equality_match(field, name), defer, false, search_timeout)
   end
 
   @doc """
@@ -419,10 +473,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level(handle, base, [filter: :present, type: type], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, present(type), def, false, search_timeout)
+  def search_single_level(handle, base, [filter: :present, type: type], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :single_level, present(type), defer, false, search_timeout)
   end
 
   @doc """
@@ -442,12 +498,21 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level(handle, base, [filter: :greater, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, greater_or_equal(type, value), def, false, search_timeout)
-  end
+  def search_single_level(handle, base, [filter: :greater, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
 
+    search(
+      handle,
+      base,
+      :single_level,
+      greater_or_equal(type, value),
+      defer,
+      false,
+      search_timeout
+    )
+  end
 
   @doc """
   search single level entry.
@@ -466,10 +531,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level(handle, base, [filter: :less, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, less_or_equal(type, value), def, false, search_timeout)
+  def search_single_level(handle, base, [filter: :less, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :single_level, less_or_equal(type, value), defer, false, search_timeout)
   end
 
   @doc """
@@ -488,22 +555,41 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_single_level(handle, base, [filter: :approx, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, approx_match(type, value), def, false, search_timeout)
+  def search_single_level(handle, base, [filter: :approx, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :single_level, approx_match(type, value), defer, false, search_timeout)
   end
 
-  def search_single_level(handle, base, [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, extensible_match(value, type, rule, dn_attribute), def, false, search_timeout)
+  def search_single_level(
+        handle,
+        base,
+        [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute],
+        defer
+      ) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :single_level,
+      extensible_match(value, type, rule, dn_attribute),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
-  def search_single_level(handle, base, [filter: :strings, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :single_level, substrings(type, value), def, false, search_timeout)
+  def search_single_level(handle, base, [filter: :strings, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :single_level, substrings(type, value), defer, false, search_timeout)
   end
 
   @doc """
@@ -518,14 +604,24 @@ defmodule ElixirLdap.Search do
       ElixirLdap.Search.search_subtree(handle, [filter: :less, type: 'age', value: "22"])
 
   """
-  def search_subtree(handle, options) do
-    base = Application.get_env(:elixir_ldap, :settings)
-          |> Keyword.get(:base)
-    search_subtree(handle, base, options)
+  def search_subtree(handle, filter) do
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
+    search_subtree(handle, base, filter)
   end
 
-  def search_subtree(handle, base, options) do
-    search_subtree(handle, base, options, :deref_always)
+  def search_subtree(handle, filter, defer) when is_atom(defer) do
+    base =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:base)
+
+    search_subtree(handle, base, filter, defer)
+  end
+
+  def search_subtree(handle, base, filter) do
+    search_subtree(handle, base, filter, :deref_always)
   end
 
   @doc """
@@ -545,10 +641,20 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_subtree(handle, base, [filter: :equal, field: field, name: name], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, equality_match(field, name), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :equal, field: field, name: name], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :whole_subtree,
+      equality_match(field, name),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
   @doc """
@@ -568,10 +674,12 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_subtree(handle, base, [filter: :present, type: type], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, present(type), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :present, type: type], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :whole_subtree, present(type), defer, false, search_timeout)
   end
 
   @doc """
@@ -591,10 +699,20 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_subtree(handle, base, [filter: :greater, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, greater_or_equal(type, value), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :greater, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :whole_subtree,
+      greater_or_equal(type, value),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
   @doc """
@@ -614,28 +732,53 @@ defmodule ElixirLdap.Search do
       * deref_always           - Always refer to alias entries
 
   """
-  def search_subtree(handle, base, [filter: :less, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, less_or_equal(type, value), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :less, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :whole_subtree, less_or_equal(type, value), defer, false, search_timeout)
   end
 
-  def search_subtree(handle, base, [filter: :approx, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, approx_match(type, value), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :approx, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :whole_subtree, approx_match(type, value), defer, false, search_timeout)
   end
 
-  def search_subtree(handle, base, [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, extensible_match(value, type, rule, dn_attribute), def, false, search_timeout)
+  def search_subtree(
+        handle,
+        base,
+        [filter: :extensible, value: value, type: type, rule: rule, dn_attributes: dn_attribute],
+        defer
+      ) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(
+      handle,
+      base,
+      :whole_subtree,
+      extensible_match(value, type, rule, dn_attribute),
+      defer,
+      false,
+      search_timeout
+    )
   end
 
-  def search_subtree(handle, base, [filter: :strings, type: type, value: value], def) do
-    search_timeout = Application.get_env(:elixir_ldap, :settings)
-                    |> Keyword.get(:search_time) || 0
-    search(handle, base, :whole_subtree, substrings(type, value), def, false, search_timeout)
+  def search_subtree(handle, base, [filter: :strings, type: type, value: value], defer) do
+    search_timeout =
+      Application.get_env(:elixir_ldap, :settings)
+      |> Keyword.get(:search_time) || 0
+
+    search(handle, base, :whole_subtree, substrings(type, value), defer, false, search_timeout)
+  end
+
+  def search_subtree(handle, base, filters, defer) when is_tuple(filters) do
+    search(handle, base, :whole_subtree, filters, defer, false)
   end
 
   @doc """
@@ -687,35 +830,62 @@ defmodule ElixirLdap.Search do
   end
 
   @doc """
+  search filter approx_match
+
   """
   def approx_match(type, value) do
     :eldap.approxMatch(to_charlist(type), to_charlist(value))
   end
 
   @doc """
+  search filter extensible_match
+
   """
   def extensible_match(match_value, type, matching_rule, dn_attributes \\ false) do
     if !is_collation_rule?(matching_rule) do
       raise "not collation rule : " <> matching_rule
     end
-    :eldap.extensibleMatch(to_charlist(match_value), [type: type, matchingRule: matching_rule, dnAttributes: dn_attributes])
+
+    :eldap.extensibleMatch(
+      to_charlist(match_value),
+      type: type,
+      matchingRule: matching_rule,
+      dnAttributes: dn_attributes
+    )
   end
 
   @doc """
+  search filter substrings
+
   """
   def substrings(type, value) when is_list(value) do
-    lists = Enum.map(value, fn({atom, sub}) -> {atom, to_charlist(sub)} end)
+    lists = Enum.map(value, fn {atom, sub} -> {atom, to_charlist(sub)} end)
     :eldap.substrings(to_charlist(type), lists)
   end
 
   @doc """
+  search filter substrings
+
   """
-  def substrings(type, {atom, sub})  do
+  def substrings(type, {atom, sub}) do
     substrings(type, [{atom, sub}])
+  end
+
+  def add_filter(filters, add_filter) when is_list(filters) do
+    filters ++ [add_filter]
+  end
+
+  def add_filter(filters, add_filter) do
+    [filters] ++ [add_filter]
+  end
+
+  def fix_and_filter(filters) do
+    with_and(filters)
   end
 
   @doc """
   and search filter
+
   """
   def with_and(filters) do
     :eldap.and(filters)
@@ -739,48 +909,90 @@ defmodule ElixirLdap.Search do
   this function actually search
 
   """
-  def search(handle, base, scope, filter, deref, types_only \\ false, timeout \\ 0)
-  def search(handle, base, scope, filter, deref, types_only, timeout) when is_list(base) do
+  def search(
+        handle,
+        base,
+        scope,
+        filter,
+        deref \\ :deref_always,
+        types_only \\ false,
+        timeout \\ 0
+      )
+
+  def search(handle, base, scope, filter, deref, types_only, timeout)
+      when is_list(base) and is_atom(scope) and is_list(filter) do
+    IO.inspect(filter)
+
     if is_tuple(List.first(base)) do
-        search(handle, [
-          base: to_charlist(to_listchar_atom_key(base)),
-          scope: search_scope(scope),
-          filter: filter,
-          deref: deref_aliases(deref),
-          types_only: types_only,
-          timeout: timeout
-        ])
-      else
-        search(handle, [
-          base: to_charlist(base),
-          scope: search_scope(scope),
-          filter: filter,
-          deref: deref_aliases(deref),
-          types_only: types_only,
-          timeout: timeout
-        ])
+      search(
+        handle,
+        base: to_charlist(to_listchar_atom_key(base)),
+        scope: search_scope(scope),
+        filter: with_and(filter),
+        deref: deref_aliases(deref),
+        types_only: types_only,
+        timeout: timeout
+      )
+    else
+      search(
+        handle,
+        base: to_charlist(base),
+        scope: search_scope(scope),
+        filter: filter,
+        deref: deref_aliases(deref),
+        types_only: types_only,
+        timeout: timeout
+      )
     end
   end
 
-  def search(handle, base, scope, filter, deref, types_only, timeout) do
-    search(handle, [
+  def search(handle, base, scope, filter, deref, types_only, timeout)
+      when is_list(base) and is_atom(scope) and is_tuple(filter) do
+    IO.inspect(filter)
+
+    if is_tuple(List.first(base)) do
+      search(
+        handle,
+        base: to_charlist(to_listchar_atom_key(base)),
+        scope: search_scope(scope),
+        filter: filter,
+        deref: deref_aliases(deref),
+        types_only: types_only,
+        timeout: timeout
+      )
+    else
+      search(
+        handle,
+        base: to_charlist(base),
+        scope: search_scope(scope),
+        filter: filter,
+        deref: deref_aliases(deref),
+        types_only: types_only,
+        timeout: timeout
+      )
+    end
+  end
+
+  def search(handle, base, scope, filter, deref, types_only, timeout) when is_atom(scope) do
+    search(
+      handle,
       base: to_charlist(base),
       scope: search_scope(scope),
       filter: filter,
       deref: deref_aliases(deref),
       types_only: types_only,
       timeout: timeout
-    ])
+    )
   end
 
   def search(handle, options) when is_list(options) do
     case :eldap.search(handle, options) do
-      {:ok, result} -> 
+      {:ok, result} ->
         result = ElixirLdap.SearchResult.from_record(result)
-        {:ok, result.entries |> Enum.map(fn(x) -> ElixirLdap.Entry.from_record(x) end)}
+        {:ok, result.entries |> Enum.map(fn x -> ElixirLdap.Entry.from_record(x) end)}
+
       {_, message} ->
         {:error, message}
     end
   end
 end
-
